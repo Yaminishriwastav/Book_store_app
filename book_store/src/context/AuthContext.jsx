@@ -1,29 +1,31 @@
-import { createContext,useState,useContext, Children } from "react";
-import {useNavigate} from "react-router-dom";
+import { createContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const AuthContext=createContext();
+export const AuthContext = createContext();
 
-export const AuthProvider=({children})=>{
-    const [user,setUser]=useState(null);
-    const navigate=useNavigate();
-     
-    const login=(userData)=>{
-        setUser(userData)
-        localStorage.setItem("user",JSON.stringify(userData));
-         navigate("/books")
+export const AuthProvider = ({ children }) => {
+    const [isAuth, setIsAuth] = useState(localStorage.getItem("token") ? true : false);
+    const navigate = useNavigate();
 
+    const login = (username, password) => {
+        if (username === "admin" && password === "1234") {
+            localStorage.setItem("token", "fake-jwt-token");
+            setIsAuth(true);
+            navigate("/books");
+        } else {
+            alert("Invalid Credentials");
+        }
     };
 
-    const logout=()=>{
-       setUser(null);
-       localStorage.removeItem('user')
-       navigate("/login")
+    const logout = () => {
+        localStorage.removeItem("token");
+        setIsAuth(false);
+        navigate("/login");
     };
-    return(
-        <Authcontext.Provider value={{user,login,logout}}>
-         {children}
-        </Authcontext.Provider>
-       
+
+    return (
+        <AuthContext.Provider value={{ isAuth, login, logout }}>
+            {children}
+        </AuthContext.Provider>
     );
 };
-export const useAuth=()=>useContext(AuthContext)
